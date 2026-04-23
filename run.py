@@ -55,21 +55,27 @@ SHEET = GSPREAD_CLIENT.open("love_sandwiches")
 
 
 def get_sales_data():
+    while True:
 
-    print("please enter sales data from your last market")
-    print("Data should be six numbers sepaarated by commas\n")
-    data_str = input("Enter your data here: ")
-    print(f"the data provided is {data_str}\n")
-    sales_data = data_str.split(",")
-    validate_data(sales_data)
+        print("please enter sales data from your last market")
+        print("Data should be six numbers sepaarated by commas\n")
+        data_str = input("Enter your data here: ")
+        print(f"the data provided is {data_str}\n")
+        sales_data = data_str.split(",")
+        if validate_data(sales_data):
+            print("Data is valid")
+            break
 
 
 def validate_data(values):
     try:
+        [int(value) for value in values]
         if len(values) != 6:
             raise ValueError(f"Exactly 6 values required, you provided {len(values)}")
     except ValueError as e:
         print(f"invalid data: {e}, please try again. \n")
+        return False
+    return True
 
 
 get_sales_data()
