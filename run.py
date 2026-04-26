@@ -116,28 +116,6 @@ def validate_data(values):
     return True  # All checks passed, data is valid
 
 
-def update_sales_worksheet(data):
-    """
-    Adds the validated sales data as a new row in the 'sales' worksheet.
-
-    Finds the tab named 'sales' inside the Google Spreadsheet
-    and appends the data as a new row at the bottom.
-
-    Args:
-        data (list): A list of integers to be added as a new row.
-                     e.g. [10, 20, 30, 40, 50, 60]
-    """
-    print("Updating sales worksheet...\n")
-
-    # Access the 'sales' tab inside the spreadsheet
-    sales_worksheet = SHEET.worksheet("sales")
-
-    # Add the data as a new row at the bottom of the sheet
-    sales_worksheet.append_row(data)
-
-    print("Sales worksheet updated successfully!\n")
-
-
 def calculate_surplus_data(sales_row):
     """
     Compare sales with stock and calculate the surplus for each item type.
@@ -150,15 +128,28 @@ def calculate_surplus_data(sales_row):
     stock = SHEET.worksheet("stock").get_all_values()
     stock_row = stock[-1]
     stock_row = [int(number) for number in stock_row]
-    # surplus = SHEET.worksheet("surplus")
-    pprint(stock)
-    print(f"stock row: {stock_row}")
-    print(f"sales row: {sales_row}")
+
     surplus_row = []
     for sales, stock in zip(stock_row, sales_row):
         surplus_row.append(stock - sales)
-    print(surplus_row)
     return surplus_row
+
+
+def update_worksheet(data, sheet):
+    print(f"updating {sheet} worksheet")
+    worksheet = SHEET.worksheet(sheet)
+    worksheet.append_row(data)
+    print(f"{sheet} worksheet updates successfully !!")
+
+
+def get_last_five_entry_sales():
+    sales = SHEET.worksheet("sales")
+    all_sales = []
+    for column_index in range(1, 7):
+        col = sales.col_values(column_index)[-5:]
+        col = [int(x) for x in col]
+        all_sales.append(col)
+    return all_sales
 
 
 # --- Main Program Flow ---
@@ -173,11 +164,13 @@ def main():
     # Step 2: Convert each value from a string to an integer
     # e.g. ["10", "20"] becomes [10, 20]
     sales_data = [int(number) for number in data]
+    update_worksheet(sales_data, "sales")
 
     # Step 3: Send the cleaned data up to the Google Spreadsheet
-    update_sales_worksheet(sales_data)
-    calculate_surplus_data(sales_data)
+    surplus_data = calculate_surplus_data(sales_data)
+    update_worksheet(surplus_data, "surplus")
 
 
 print("welcome to love sandwiches data automation")
-main()
+# main()
+print(get_last_five_entry_sales())
