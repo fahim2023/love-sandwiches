@@ -55,27 +55,96 @@ SHEET = GSPREAD_CLIENT.open("love_sandwiches")
 
 
 def get_sales_data():
-    while True:
+    """
+    Asks the user to input their sales figures from the last market.
 
-        print("please enter sales data from your last market")
-        print("Data should be six numbers sepaarated by commas\n")
+    Keeps asking in a loop until the user provides valid data.
+    Once valid data is entered, it returns the data as a list of strings.
+
+    Returns:
+        list: A list of 6 string values e.g. ['10', '20', '30', '40', '50', '60']
+    """
+    while True:
+        # Prompt the user to enter their sales figures
+        print("Please enter sales data from your last market.")
+        print("Data should be six numbers separated by commas.\n")
+
+        # Store whatever the user types as a string
         data_str = input("Enter your data here: ")
-        print(f"the data provided is {data_str}\n")
+
+        print(f"The data provided is: {data_str}\n")
+
+        # Split the string into a list using the comma as a separator
+        # e.g. "10,20,30" becomes ["10", "20", "30"]
         sales_data = data_str.split(",")
+
+        # Check if the data is valid before moving on
         if validate_data(sales_data):
-            print("Data is valid")
-            break
+            print("Data is valid!")
+            return sales_data  # Exit the loop and return the valid data
 
 
 def validate_data(values):
+    """
+    Validates the sales data entered by the user.
+
+    Checks two things:
+      1. That all values can be converted to integers (no letters or symbols).
+      2. That exactly 6 values were provided.
+
+    Args:
+        values (list): The list of strings to validate.
+
+    Returns:
+        bool: True if the data is valid, False if not.
+    """
     try:
+        # Try converting every value in the list to an integer
+        # If any value isn't a number, this will trigger a ValueError
         [int(value) for value in values]
+
+        # Check that the user entered exactly 6 numbers
         if len(values) != 6:
             raise ValueError(f"Exactly 6 values required, you provided {len(values)}")
+
     except ValueError as e:
-        print(f"invalid data: {e}, please try again. \n")
-        return False
-    return True
+        # If anything went wrong, print the error and tell the user to try again
+        print(f"Invalid data: {e}, please try again.\n")
+        return False  # Data is not valid
+
+    return True  # All checks passed, data is valid
 
 
-get_sales_data()
+def update_sales_worksheet(data):
+    """
+    Adds the validated sales data as a new row in the 'sales' worksheet.
+
+    Finds the tab named 'sales' inside the Google Spreadsheet
+    and appends the data as a new row at the bottom.
+
+    Args:
+        data (list): A list of integers to be added as a new row.
+                     e.g. [10, 20, 30, 40, 50, 60]
+    """
+    print("Updating sales worksheet...\n")
+
+    # Access the 'sales' tab inside the spreadsheet
+    sales_worksheet = SHEET.worksheet("sales")
+
+    # Add the data as a new row at the bottom of the sheet
+    sales_worksheet.append_row(data)
+
+    print("Sales worksheet updated successfully!\n")
+
+
+# --- Main Program Flow ---
+
+# Step 1: Ask the user for their sales data and keep asking until it's valid
+data = get_sales_data()
+
+# Step 2: Convert each value from a string to an integer
+# e.g. ["10", "20"] becomes [10, 20]
+sales_data = [int(number) for number in data]
+
+# Step 3: Send the cleaned data up to the Google Spreadsheet
+update_sales_worksheet(sales_data)
