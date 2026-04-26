@@ -2,6 +2,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from pprint import pprint
 
+
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive.file",
@@ -152,6 +153,17 @@ def get_last_five_entry_sales():
     return all_sales
 
 
+def calculate_stock_data(data):
+    print("calculating stock data...")
+    new_stock_data = []
+    for column in data:
+        avg = sum(column) / 5
+        stock_number = round(avg * 1.1)
+        new_stock_data.append(stock_number)
+    print(new_stock_data)
+    return new_stock_data
+
+
 # --- Main Program Flow ---
 def main():
     """
@@ -169,8 +181,10 @@ def main():
     # Step 3: Send the cleaned data up to the Google Spreadsheet
     surplus_data = calculate_surplus_data(sales_data)
     update_worksheet(surplus_data, "surplus")
+    sales_columns = get_last_five_entry_sales()
+    stock_data = calculate_stock_data(sales_columns)
+    update_worksheet(stock_data, "stock")
 
 
 print("welcome to love sandwiches data automation")
-# main()
-print(get_last_five_entry_sales())
+main()
